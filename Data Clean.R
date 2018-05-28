@@ -8,7 +8,10 @@ OneOrZero <- function(datt)
   else 
     {return(1)}
 }
-Data_Reducer <- function(dat, alpha = .00005910579)
+
+
+# 1 way to do it
+Data_Reducer_1 <- function(dat, alpha = .00005910579)
 {
   # The default alpha comes from "How I chose Alpha" (Below)
   #### Data Prep (it takes a while)
@@ -33,10 +36,66 @@ Data_Reducer <- function(dat, alpha = .00005910579)
 }
 #Example:
 Mat <- matrix(seq(0, 9), nrow = 10, ncol = 10, byrow = T)
-Data_Reducer(Mat, .01)
+Data_Reducer_1(Mat, .01)
+
+
+# Another way to do it
+Data_Reducer_2 <- function(dat, alpha = .05)
+{
+  # The default alpha comes from "How I chose Alpha 2" (Below)
+  #### Data Prep (it takes a while)
+  mtrain <- as.matrix(dat)
+  mtrain <- as.matrix(c(mapply(OneOrZero, mtrain)))
+  mtrain <- matrix(mtrain, nrow = nrow(dat), ncol = ncol(dat), byrow = FALSE)
+  
+  total <- sum(apply(mtrain, 2, sum))
+  
+  index <- numeric()
+  holder <- numeric()
+  for(i in 1:ncol(mtrain))
+  {
+    holder[i] <- sum(mtrain[,i])/total
+  }
+  holder_index <- order(holder, decreasing = F)
+  holder_2 <- 0
+  
+  for(i in 1:length(holder))
+  {
+    holder_2 = holder_2 + holder[holder_index[i]]
+    if(holder_2 < alpha)
+    {
+      index <- c(index, holder_index[i])
+    }
+    else
+    {
+      return(dat[,-c(index)])
+    }
+  }
+  
+  
+  
+}
+#Example:
+Mat <- matrix(c(1), nrow = 10, ncol = 10, byrow = T)
+diag(Mat) = 0
+Mat[9, 10] = 0
+Mat[3, 2] = 0
+Mat[5, 3] = 0
+Data_Reducer_2(Mat, .5)
+
 
 #creates reducded data
-reduced_train <- Data_Reducer(train)
+reduced_train <- Data_Reducer_1(train)
+reduced_train_2 <- Data_Reducer_2(train)
+ncol(reduced_train)
+ncol(reduced_train_2)
+#Positives 
+## Reduced more data
+## Allows for standard alpha
+
+#Negatives:
+## time expensive
+## Does not give preference for ties (just removed in added order)
 
 
 # How I Chose Alpha:
