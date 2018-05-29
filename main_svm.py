@@ -39,7 +39,7 @@ for i in range(5):
 Then it makes predictions based on the test data.
 The goal is to have it output a vector of predicted numbers.
 This will theoretically work, but with our data size, it will be computationally expensive.
-I think the best opotions will be to shrink our data, or research LinearSVR. http://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVR.html
+I think the best opotions will be to shrink our data, or research LinearSVC. http://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVR.html
 '''
 
 def svmPredict(labels, data, test):
@@ -49,14 +49,21 @@ def svmPredict(labels, data, test):
 	# fitting the model 
 	clf.fit(data, labels)
 	# creating a list of predicted values
-	prediction_list = []
-	for i in range(len(test)):
-		prediction = clf.predict(test[i])
-		prediction_list.append(prediction)
+	prediction = clf.predict(test)
 
-	return prediction_list
+	return prediction
+
+''' Using a linear approach to decrease run time. Runs relatively fast considering our data size. No idea if it's accurate '''
+def linearPredict(labels, data, test):
+	# creating the LinearSVC object
+	clf = svm.LinearSVC()
+	# fitting the model to our data
+	clf.fit(data, labels)
+	# making predictions based on test data
+	prediction = clf.predict(test)
+
+	return prediction
 
 labels, data = readTrainData('train.csv')
-print(labels)
 test = readTestData('test.csv')
-print(svmPredict(labels, data, test))
+print(linearPredict(labels, data, test))
