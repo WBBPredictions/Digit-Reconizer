@@ -67,3 +67,10 @@ def linearPredict(labels, data, test):
 labels, data = readTrainData('train.csv')
 test = readTestData('test.csv')
 print(linearPredict(labels, data, test))
+print(svmPredict(labels, data, test))
+
+''' What still needs to be done:
+-Save the objects as files so that we don't have to fit the model every time we want to make predictions (use the pickle module for this)
+-Check to see if these methods are even accurate. How do they compare to each other? Is computation time more important or is accuracy?
+-write our output predictions to a csv for submission purposes 
+'''
