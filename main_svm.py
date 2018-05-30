@@ -1,6 +1,9 @@
 import csv
 import numpy as np
 from sklearn import svm
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
 ''' This first function is to read in the data from a csv and put it into a list
 takes a filename as an input '''
 
@@ -64,13 +67,15 @@ def linearPredict(labels, data, test):
 
 	return prediction
 
-labels, data = readTrainData('train.csv')
-test = readTestData('test.csv')
-print(linearPredict(labels, data, test))
-print(svmPredict(labels, data, test))
+''' Adding a cross validation function '''
+def testSample(labels, data, test_size):
+	data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size = test_size, random_state = 0)
 
-''' What still needs to be done:
--Save the objects as files so that we don't have to fit the model every time we want to make predictions (use the pickle module for this)
--Check to see if these methods are even accurate. How do they compare to each other? Is computation time more important or is accuracy?
--write our output predictions to a csv for submission purposes 
-'''
+	return data_train, data_test, labels_train, labels_test
+
+''' Code for running one trial to test accuracy '''
+y, X = readTrainData('train.csv')
+data_train, data_test, labels_train, labels_test = testSample(y, X, 0.4)
+clf = svm.SVC(kernel = 'rbf', C = 1)
+clf.fit(data_train, labels_train)
+print(clf.score(data_test, labels_test))
