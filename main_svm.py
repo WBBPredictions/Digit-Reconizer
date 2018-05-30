@@ -3,6 +3,7 @@ import numpy as np
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 ''' This first function is to read in the data from a csv and put it into a list
 takes a filename as an input '''
@@ -73,9 +74,17 @@ def testSample(labels, data, test_size):
 
 	return data_train, data_test, labels_train, labels_test
 
-''' Code for running one trial to test accuracy '''
+# Trying out different parameters to see if we get any drastic changes
+# Smaller C vlaue seems to work slightly better although this may be due to sampling variation
+ 
 y, X = readTrainData('train.csv')
-data_train, data_test, labels_train, labels_test = testSample(y, X, 0.4)
-clf = svm.SVC(kernel = 'rbf', C = 1)
-clf.fit(data_train, labels_train)
-print(clf.score(data_test, labels_test))
+params = [0.001, 0.01, 0.05, 0.1, 1, 5, 10]
+for i in range(len(params)):
+	score_list = []
+	for j in range(10):
+		data_train, data_test, labels_train, labels_test = testSample(y, X, 0.4)
+		clf = svm.LinearSVC(C = params[i])
+		clf.fit(data_train, labels_train)
+		score_list.append(clf.score(data_test, labels_test))
+	print(score_list)
+	print(np.mean(score_list))
