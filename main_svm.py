@@ -31,14 +31,6 @@ def readTestData(file):
 	working_list = np.array(in_list)[1:].astype(int)
 	return working_list
 
-''' 
-quick sanity check here. I think it works
-lables , data = readData('train.csv')
-print(lables)
-for i in range(5):
-	print(data[i])
-'''
-
 ''' This function fits an svm model to a matrix of data with a vector of labels.
 Then it makes predictions based on the test data.
 The goal is to have it output a vector of predicted numbers.
@@ -76,7 +68,7 @@ def testSample(labels, data, test_size):
 
 # Trying out different parameters to see if we get any drastic changes
 # Smaller C vlaue seems to work slightly better although this may be due to sampling variation
- 
+''' 
 y, X = readTrainData('train.csv')
 params = [0.001, 0.01, 0.05, 0.1, 1, 5, 10]
 for i in range(len(params)):
@@ -88,3 +80,20 @@ for i in range(len(params)):
 		score_list.append(clf.score(data_test, labels_test))
 	print(score_list)
 	print(np.mean(score_list))
+'''
+
+# Doing a little investigating to see what numbers give us the most problems
+# Will print out the model accuracy, then predicted value in the first column, actual value in the second column
+y, X = readTrainData('train.csv')
+data_train, data_test, labels_train, labels_test = testSample(y, X, 0.4)
+clf = svm.LinearSVC(C = 0.01)
+clf.fit(data_train, labels_train)
+prediction = clf.predict(data_test)
+print(clf.score(data_test,labels_test))
+for i in range(len(prediction)):
+	if prediction[i] != labels_test[i]:
+		print(prediction[i],labels_test[i])
+
+# Looks like the system is confusing 9's and 4's a lot.
+# I suggest we look into a K-nearest neighbors approach with weights on the list of 9's and 4's
+# I think this will push us above 90% accuracy
