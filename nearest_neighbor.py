@@ -22,7 +22,7 @@ def testSample(labels, data, test_size):
 
 # attempting to take 5 random samples and test accuracy
 for i in range(5):
-	y, X = readTrainData('train.csv')
+	X, y = readTrainData('train.csv')
 	data_train, data_test, labels_train, labels_test = testSample(y, X, 0.3)
 	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance')
 	neigh.fit(data_train, labels_train)
