@@ -84,26 +84,26 @@ def train94(data, labels):
 
 # A function that attempts to separately distiguish between 9's and 4's
 def twoStepPrediction(labels, data, test):
-	# First we fit using every number
-	whole = svm.LinearSVC()
-	whole.fit(data, labels)
-	# Fit a separate model using just 9's and 4's
-	data_94, labels_94 = train94(data, labels)
-	partial = svm.LinearSVC()
-	partial.fit(data_94, labels_94)
-	# make predictions based on all the numbers
-	predictions_whole = whole.predict(test)
-	final_predictions = []
-	# if the whole model returns a prediction of a 9 or a 4, then check it against the partial model
-	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance')
-     neigh.fit(data_94, labels_94)
-     
+    	# First we fit using every number
+    whole = svm.LinearSVC()
+    whole.fit(data, labels)
+    	# Fit a separate model using just 9's and 4's
+    data_94, labels_94 = train94(data, labels)
+    partial = svm.LinearSVC()
+    partial.fit(data_94, labels_94)
+    	# make predictions based on all the numbers
+    predictions_whole = whole.predict(test)
+    final_predictions = []
+    	# if the whole model returns a prediction of a 9 or a 4, then check it against the partial model
+    neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance')
+    neigh.fit(data_94, labels_94)
+         
     for i in range(len(predictions_whole)):
-		if predictions_whole[i] == 4 or predictions_whole[i] == 9:
-              prediction_partial = neigh.predict(test[i])
-			final_predictions.append(prediction_partial[0])
-		else:
-			final_predictions.append(predictions_whole[i])
+        if predictions_whole[i] == 4 or predictions_whole[i] == 9:
+            prediction_partial = neigh.predict([test[i]])
+            final_predictions.append(prediction_partial[0])
+        else:
+            final_predictions.append(predictions_whole[i])
 	return final_predictions
 
 
