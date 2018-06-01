@@ -136,7 +136,7 @@ for i in range(len(prediction)):
 def main():
 	for i in range(10):
 		y, X = readTrainData('train.csv')
-		data_train, data_test, labels_train, labels_test = testSample(y, X, 0.4)
+		data_train, data_test, labels_train, labels_test = testSample(y, X, 0.25)
 		prediction1 = linearPredict(labels_train, data_train, data_test)
 		prediction2 = twoStepPrediction(labels_train, data_train, data_test)
 		compare1 = []
@@ -156,5 +156,4 @@ def main():
 		print('Two Step Prediction Accuracy: ', np.mean(compare2))
 		print('----------------------------------')
 main()
-
 # I'm not seeing a real significant increase in accuracy, in some cases we see a decrease
