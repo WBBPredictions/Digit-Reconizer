@@ -32,5 +32,9 @@ subsetter <- function(data, size, seed = NULL)
 
 #Change size/seed for different results.
 #My default seed will be 69... because I'm a child
-write.csv(subsetter(dat, .1, seed = 69), file = "Mini_train.csv")
+newdat <- subsetter(dat, .1, seed = 69)
+
+#this gets rid of the index column (which tells what rows got selected)
+newdat <- newdat[,-1]
+write.csv(newdat, file = "Mini_train.csv")
 
