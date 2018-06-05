@@ -1,6 +1,6 @@
 library(readr)
 #Put your path here
-#dat <- read_csv("~/Desktop/Projects/Group/train.csv")
+FullData <- read_csv("~/Desktop/Projects/Group/train.csv")
 ###### IMPORTANT NOTE ###########
 #Once you load 'dat' the first time, comment out the above line
 #It only needs to be loaded in once into your global enviornment
@@ -32,9 +32,9 @@ subsetter <- function(data, size, seed = NULL)
 
 #Change size/seed for different results.
 #My default seed will be 69... because I'm a child
-newdat <- subsetter(dat, .1, seed = 69)
+newdat <- subsetter(FullData, .4, seed = 69)
 
 #this gets rid of the index column (which tells what rows got selected)
-newdat <- newdat[,-1]
+#newdat <- newdat[,-1]
 write.csv(newdat, file = "Mini_train.csv")
 
