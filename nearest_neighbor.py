@@ -33,4 +33,10 @@ for i in range(5):
 			compare.append(1)
 		else:
 			compare.append(0)
+	print('Run: ', i+1)		
 	print(np.mean(compare))
+
+	for k in range(len(prediction)):
+		if prediction[k] != labels_test[k]:
+			print('Predicted Number: ', prediction[k], ' Actual Number: ', labels_test[k])
+	print('-------------------------------')
