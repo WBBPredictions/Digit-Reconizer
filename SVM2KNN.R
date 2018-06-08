@@ -3,7 +3,7 @@ library(readr)
 library(Matrix)
 library(e1071)
 #detach(e1071)
-dat <- read_csv("~/Desktop/Projects/Group/Mini_train.csv", col_types = cols(X1 = col_skip()))
+dat <- read_csv(file.choose(), col_types = cols(X1 = col_skip()))
 datt <- Cross_val_maker(dat, .1)
 Train <- datt$Train
 Test <- datt$Test
@@ -55,6 +55,8 @@ The_Big_Test <- function(data, alpha)
   
 }
 
-Buisc <- The_Big_Test(dat, .1)
-Buisc
-
+Buisc <- {}
+for(i in 1:1000){
+  
+  Buisc[i] <- The_Big_Test(dat, .1)
+}

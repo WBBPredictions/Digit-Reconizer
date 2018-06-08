@@ -1,13 +1,13 @@
 library(readr)
 #Put your path here
-FullData <- read_csv("~/Desktop/Projects/Group/train.csv")
+FullData <- read_csv(file.choose())
 ###### IMPORTANT NOTE ###########
 #Once you load 'dat' the first time, comment out the above line
 #It only needs to be loaded in once into your global enviornment
 
 
 #Make sure to set your working directory to yhe github page
-setwd("~/Desktop/Projects/Group")
+#setwd("C:\Users\terri\OneDrive\Documents\Data Competitions\Digit Recognizer\test.csv")
 
 subsetter <- function(data, size, seed = NULL)
 {

@@ -70,7 +70,7 @@ def loadTrainedSets():
 def main():
 	# reading in data, splitting it, fitting knn to the train data
 	data_test, labels_test, data_train, labels_train = splitData('train.csv')
-	neigh = KNeighborsClassifier(n_neighbors=5, weights = 'distance')
+	neigh = KNeighborsClassifier(n_neighbors=3, weights = 'distance')
 	neigh.fit(data_train, labels_train)
 	prediction_nn = neigh.predict(data_test)
 	# gives a 2D array of the knn probabilities
