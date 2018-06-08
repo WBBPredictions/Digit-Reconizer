@@ -6,8 +6,13 @@ FullData <- read_csv(file.choose())
 #It only needs to be loaded in once into your global enviornment
 
 
+<<<<<<< HEAD
 #Make sure to set your working directory to yhe github page
 #setwd("C:\Users\terri\OneDrive\Documents\Data Competitions\Digit Recognizer\test.csv")
+=======
+#Make sure to set your working directory to the github page
+setwd("~/Desktop/Projects/Group")
+>>>>>>> 0d94983d69604309f72fa45a85a097c20085f8eb
 
 subsetter <- function(data, size, seed = NULL)
 {
