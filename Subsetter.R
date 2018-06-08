@@ -6,7 +6,7 @@ FullData <- read_csv("~/Desktop/Projects/Group/train.csv")
 #It only needs to be loaded in once into your global enviornment
 
 
-#Make sure to set your working directory to yhe github page
+#Make sure to set your working directory to the github page
 setwd("~/Desktop/Projects/Group")
 
 subsetter <- function(data, size, seed = NULL)
