@@ -39,7 +39,7 @@ def splitData(file):
 	return data_test, labels_test, data_train, labels_train
 
 def saveLinear(data, labels):
-	for i in range(10):
+	for i in range(30):
 		data_train, data_test, labels_train, labels_test = testSample(labels, data, 0.3)
 		clf = svm.LinearSVC()
 		clf.fit(data_train, labels_train)
@@ -47,36 +47,40 @@ def saveLinear(data, labels):
 		filename2 = 'test_data_%d.pkl'%(i,)
 		filename3 = 'test_labels_%d.pkl'%(i,)
 		joblib.dump(clf, filename1)
-		joblib.dump(data_test, filename2)
-		joblib.dump(labels_test, filename3)
+		#joblib.dump(data_test, filename2)
+		#joblib.dump(labels_test, filename3)
 
 # function that loads a trained dataset that is saved in the working directory 
 def loadTrainedSets():
 	trained = []
 	data = []
 	labels = []
-	for i in range(10):
+	for i in range(30):
 		filename1 = 'trained_linear_%d.pkl'%(i,)
-		filename2 = 'test_data_%d.pkl'%(i,)
-		filename3 = 'test_labels_%d.pkl'%(i,)
+		#filename2 = 'test_data_%d.pkl'%(i,)
+		#filename3 = 'test_labels_%d.pkl'%(i,)
 		clf = joblib.load(filename1)
-		test_data = joblib.load(filename2)
-		test_labels = joblib.load(filename3)
+		#test_data = joblib.load(filename2)
+		#test_labels = joblib.load(filename3)
 		trained.append(clf)
-		data.append(test_data)
-		labels.append(test_labels)
-	return trained, data, labels
+		#data.append(test_data)
+		#labels.append(test_labels)
+	return trained
 
 def main():
 	# reading in data, splitting it, fitting knn to the train data
+	print('Reading data...')
 	data_test, labels_test, data_train, labels_train = splitData('train.csv')
-	neigh = KNeighborsClassifier(n_neighbors=3, weights = 'distance')
+	# loading the saved linear svm sets in my working directory
+	print('Loading trained sets...')
+	trained = loadTrainedSets()
+	# fitting the knn model and making predictions
+	print('Fitting KNN...')
+	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance')
 	neigh.fit(data_train, labels_train)
 	prediction_nn = neigh.predict(data_test)
 	# gives a 2D array of the knn probabilities
 	probs = neigh.predict_proba(data_test)
-	# loading the saved linear svm sets in my working directory
-	trained, data, labels = loadTrainedSets()
 	# creating a 2D array of the predictions of all the saved linear svm sets
 	prediction_pool = []
 	for i in range(len(trained)):
@@ -86,16 +90,15 @@ def main():
 	# need the transpose for looping purposes
 	prediction_pool = np.array(prediction_pool).T.tolist()
 	final_prediction = []
+	print('Making predictions...')
 	for i in range(len(probs)):
 		high_odds = False
 		for j in range(len(probs[i])):
 			if probs[i, j] > 0.4:
 				high_odds = True
 		if high_odds:
-			print('high odds')
 			final_prediction.append(prediction_nn[i])
 		else:
-			print('low odds')
 			try:
 				most_frequent_number = statistics.mode(prediction_pool[i])
 				final_prediction.append(most_frequent_number)
@@ -103,27 +106,12 @@ def main():
 			except statistics.StatisticsError:
 				print('exception')
 				final_prediction.append(prediction_nn[i])
-	'''
-	for i in range(len(prediction_pool)):
-		nn_value = int(prediction_nn[i])
-		try:
-			most_frequent_number = statistics.mode(prediction_pool[i])
-			if prediction_pool[i].count(most_frequent_number)>7:
-				check = True
-			else:
-				check = False
-			if nn_value != most_frequent_number and check:
-				final_prediction.append(most_frequent_number)
-			else:
-				final_prediction.append(prediction_nn[i])
-		except statistics.StatisticsError:
-			final_prediction.append(prediction_nn[i])
-	'''
 	compare = []		
 	for i in range(len(final_prediction)):
 		if final_prediction[i] == labels_test[i]:
 			compare.append(1)
 		else:
 			compare.append(0)
+	print('Done...')
 	print(np.mean(compare))
 main()
