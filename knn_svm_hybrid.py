@@ -69,14 +69,18 @@ def loadTrainedSets():
 
 def main():
 	# reading in data, splitting it, fitting knn to the train data
+	print('Reading data...')
 	data_test, labels_test, data_train, labels_train = splitData('train.csv')
-	neigh = KNeighborsClassifier(n_neighbors=3, weights = 'distance')
+	# loading the saved linear svm sets in my working directory
+	print('Loading trained sets...')
+	trained = loadTrainedSets()
+	# fitting the knn model and making predictions
+	print('Fitting KNN...')
+	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance')
 	neigh.fit(data_train, labels_train)
 	prediction_nn = neigh.predict(data_test)
 	# gives a 2D array of the knn probabilities
 	probs = neigh.predict_proba(data_test)
-	# loading the saved linear svm sets in my working directory
-	trained = loadTrainedSets()
 	# creating a 2D array of the predictions of all the saved linear svm sets
 	prediction_pool = []
 	for i in range(len(trained)):
@@ -86,16 +90,15 @@ def main():
 	# need the transpose for looping purposes
 	prediction_pool = np.array(prediction_pool).T.tolist()
 	final_prediction = []
+	print('Making predictions...')
 	for i in range(len(probs)):
 		high_odds = False
 		for j in range(len(probs[i])):
 			if probs[i, j] > 0.4:
 				high_odds = True
 		if high_odds:
-			print('high odds')
 			final_prediction.append(prediction_nn[i])
 		else:
-			print('low odds')
 			try:
 				most_frequent_number = statistics.mode(prediction_pool[i])
 				final_prediction.append(most_frequent_number)
@@ -109,5 +112,6 @@ def main():
 			compare.append(1)
 		else:
 			compare.append(0)
+	print('Done...')
 	print(np.mean(compare))
 main()
