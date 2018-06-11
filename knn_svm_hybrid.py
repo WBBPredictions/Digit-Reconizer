@@ -2,10 +2,9 @@ import csv
 import numpy as np
 import math
 import statistics
+import smtplib
 from sklearn import svm
 from sklearn.externals import joblib
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import NearestNeighbors
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -67,6 +66,13 @@ def loadTrainedSets():
 		#labels.append(test_labels)
 	return trained
 
+def sendEmail(msg):
+	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server.starttls()
+	server.login("WBBPredictions@gmail.com", "Team6969")
+	server.sendmail("WBBPredictions@gmail.com", "terrisbecker@gmail.com", msg)
+	server.quit()
+
 def main():
 	# reading in data, splitting it, fitting knn to the train data
 	print('Reading data...')
@@ -76,7 +82,7 @@ def main():
 	trained = loadTrainedSets()
 	# fitting the knn model and making predictions
 	print('Fitting KNN...')
-	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance')
+	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance', algorithm = 'brute')
 	neigh.fit(data_train, labels_train)
 	prediction_nn = neigh.predict(data_test)
 	# gives a 2D array of the knn probabilities
@@ -102,9 +108,7 @@ def main():
 			try:
 				most_frequent_number = statistics.mode(prediction_pool[i])
 				final_prediction.append(most_frequent_number)
-				print('trying')
 			except statistics.StatisticsError:
-				print('exception')
 				final_prediction.append(prediction_nn[i])
 	compare = []		
 	for i in range(len(final_prediction)):
@@ -113,5 +117,7 @@ def main():
 		else:
 			compare.append(0)
 	print('Done...')
-	print(np.mean(compare))
+	result = str(np.mean(compare))
+	print(result)
+	sendEmail(result)
 main()
