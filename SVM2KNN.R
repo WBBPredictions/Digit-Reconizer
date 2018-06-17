@@ -5,14 +5,14 @@ library(e1071)
 library(beepr)
 
 dat <- read_csv(file.choose(), col_types = cols(X1 = col_skip()))
-datt <- Cross_val_maker(dat, .1)
+datt <- Cross_val_maker(dat, .4)
 Train <- datt$Train
 Test <- datt$Test
 
 svm.fit <- svm(Train$label~., data = Train, type = "C-classification", kernel = "linear")
 summary(svm.fit)
 
-pred <- predict(svm.fit, Test[,-1])
+pred <- predict.svm(svm.fit, Test[,-1], decision.values = T)
 table(pred, Test[,1])
 
 dat <- read_csv("~/Desktop/Projects/Group/Mini_train.csv", col_types = cols(X1 = col_skip()))

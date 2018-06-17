@@ -1,19 +1,48 @@
 library(caret)
-library(class)
+#library(class)
+library(FNN)
 library(beepr)
 library(readr)
-library(e1071)
-Mini_train <- read_csv("~/Desktop/Projects/Group/Mini_train.csv", col_types = cols(X1 = col_skip()))
-train <- Mini_train
-resp <- Mini_train$label
-preds <- Mini_train[,-1]
+library(liquidSVM)
+library(ranger)
+Mini_train <- read_csv("~/Desktop/Projects/Group/Mini_train_temp.csv", col_types = cols(X1 = col_skip()))
+dat <- Mini_train[,-c(which(colSums(Mini_train) == 0))]
+set.seed(69)
+datt <- Cross_val_maker(dat, .2)
+Train <- datt$Train
+Train$label <- factor(Train$label)
+Test <- datt$Test
+Test$label <- factor(Test$label)
 
-The_Deal <- fuction(train, point, model)
+The_Deal <- fuction(Train, Test, point, model)
 {
+  s <- Sys.time()
   # Fit the SVM, KNN, Random Forest (RF)
-  fit.svm <- svm(label ~ ., data = train, type = "C-classification", kernel = "linear", cross = 5)
-  obj <- tune(svm, label ~ ., data = train, ranges = list(gamma = 2^(-1:1), cost = 2^(0:4)), tunecontrol = tune.control(sampling = "fix"))
-  summary(fit.svm)
+  #fit.svm <- svm(factor(label) ~ ., data = Train, kernel = "linear", cross = 5, cost = 8, gamma = .5)
+  fit.svm <- mcSVM(label ~ ., Train, mc_type = "AvA")
+  pred.svm <- predict(fit.svm, Test[,-1])
+  fit.knn <- knn(Train[, -1], Test[,-1], Train[, 1])
+  rf <- ranger(factor(label) ~ ., data = Train, num.trees = 500, classification = T)
+  pred.rf <- predict(rf, Test[,-1])
+  #SVM
+  sum(diag(table(pred.svm, Test$label)))/sum(table(pred.svm, Test$label))
+  #KNN
+  sum(diag(table(fit.knn, Test$label)))/sum(table(fit.knn, Test$label))
+  #rf
+  sum(diag(table(pred.rf$predictions, Test$label)))/sum(table(pred.rf$predictions, Test$label))
+  
+  
+  
+  
+  
+  
+  
+  
+  (Sys.time() - s)
+  #obj <- tune(svm, label ~ ., data = train, ranges = list(gamma = 2^(-1:1), cost = 2^(0:4)), tunecontrol = tune.control(sampling = "fix"))
+  #summary(fit.svm)
+  #tune.knn(train[, -1], y = factor(resp), k = 1:7)
+  #beep()
   # Pull certainty from SVM, KNN and RF
   
   # Use those decisions to fit a logistic model (trust or not trust)
