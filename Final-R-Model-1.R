@@ -5,9 +5,10 @@ library(beepr)
 library(readr)
 library(liquidSVM)
 library(ranger)
+source("/Users/travisbarton/Desktop/Projects/Cross Val Maker.R")
 Mini_train <- read_csv("~/Desktop/Projects/Group/Mini_train_temp.csv", col_types = cols(X1 = col_skip()))
-dat <- Mini_train[,-c(which(colSums(Mini_train) == 0))]
-set.seed(69)
+dat <- Mini_train/255
+dat[,1] <- dat[,1]*255
 datt <- Cross_val_maker(dat, .2)
 Train <- datt$Train
 Train$label <- factor(Train$label)
@@ -22,7 +23,7 @@ The_Deal <- fuction(Train, Test, point, model)
   fit.svm <- mcSVM(label ~ ., Train, mc_type = "AvA")
   pred.svm <- predict(fit.svm, Test[,-1])
   fit.knn <- knn(Train[, -1], Test[,-1], Train[, 1])
-  rf <- ranger(factor(label) ~ ., data = Train, num.trees = 500, classification = T)
+  rf <- ranger(label ~ ., data = Train, num.trees = 500, classification = T)
   pred.rf <- predict(rf, Test[,-1])
   #SVM
   sum(diag(table(pred.svm, Test$label)))/sum(table(pred.svm, Test$label))
