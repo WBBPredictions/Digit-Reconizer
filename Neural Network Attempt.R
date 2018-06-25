@@ -147,7 +147,7 @@ network <- neuralnet(label ~ pixel0 + pixel1 + pixel2 + pixel3 + pixel4 + pixel5
                        pixel763 + pixel764 + pixel765 + pixel766 + pixel767 + pixel768 + 
                        pixel769 + pixel770 + pixel771 + pixel772 + pixel773 + pixel774 + 
                        pixel775 + pixel776 + pixel777 + pixel778 + pixel779 + pixel780 + 
-                       pixel781 + pixel782 + pixel783, data = Train, hidden = c(128, 64,10), algorithm = "rprop+", err.fct = 'sse', linear.output = F, likelihood = T)
+                       pixel781 + pixel782 + pixel783, data = Train, hidden = c(1), linear.output = T)
 Sys.time() - s
 
 summary(network)
@@ -159,6 +159,7 @@ pred <- compute(network, Test[,-1])
 Sys.time() - s
 pred$net.result[4,]
 
+sum(diag(table(round(pred$net.result), Test[,1])))/sum(table(round(pred$net.result), Test[,1]))
 ### Plotting? 
 
 plot(network, rep = "best")
