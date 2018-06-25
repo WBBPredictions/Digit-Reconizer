@@ -28,7 +28,7 @@ def readTestData(file):
 def fitKNN():
 	data, labels = readTrainData('train.csv')
 	data_test = readTestData('test.csv')
-	neigh = KNeighborsClassifier(n_neighbors=4, weights = 'distance', algorithm = 'brute')
+	neigh = KNeighborsClassifier(n_neighbors=5, weights = 'distance', algorithm = 'brute')
 	neigh.fit(data, labels)
 	prediction_nn = neigh.predict(data_test)
 	probs_nn = neigh.predict_proba(data_test)
@@ -67,12 +67,18 @@ def loadTrainedSets():
 		trained.append(clf)
 	return trained
 
+def writeToCSV(prediction):
+	with open('output.csv', 'w') as myfile:
+		wr = csv.writer(myfile)
+		wr.writerow(prediction)
+
 def main():
 	data_test = readTestData('test.csv')
-	print('Fitting KNN...')
-	prediction_nn, probs_nn = fitKNN()
 	print('Fitting Random Forest...')
 	prediction_rf, probs_rf = fitRF()
+	print(probs_rf)
+	print('Fitting KNN...')
+	prediction_nn, probs_nn = fitKNN()
 	# loading my trained svm sets
 	trained = loadTrainedSets()
 	prediction_pool = []
@@ -92,7 +98,7 @@ def main():
 		try:
 			max_prob_svm = statistics.mode(prediction_pool[i])
 		except statistics.StatisticsError:
-			max_prob_svm = prediction_nn[i]
+			max_prob_svm = prediction_rf[i]
 			a = prediction_pool[i]
 			d = {x:a.count(x) for x in a}
 
@@ -107,5 +113,6 @@ def main():
 			final_prediction.append(prediction_rf[i])
 		else:
 			final_prediction.append(max_prob_svm)
-	print(final_prediction)
-main()
+	return final_prediction
+
+writeToCSV(main())	
