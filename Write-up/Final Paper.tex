@@ -6,6 +6,9 @@
 \usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
 								% TeX will automatically convert eps --> pdf in pdflatex		
 \usepackage{amssymb}
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
 
 %SetFonts
 
@@ -33,15 +36,57 @@ PCA is a method of dimensionality reduction that takes advantage of the correlat
 
 \subsection{SVM}
 Support Vector Machines, or SVM, attempts to analyze data by creating m, n-dimensional hyperplanes planes that reduce the residual error as much as possible. These hyperplanes attempt to act as borders, separating the response into its categories. Since we have 10 response values (digits 0-9), we need m = 9, n-dimensional planes to separate them. The number of dimensions for each plane depends on how many predictors we use. Our 'unraveled thread? contained the information from a 28x28 pixel image, so our planes each have n = 784 dimensions. For the purposes of explanation, we will look at a 2 dimensional example: (insert figures here) If one were to attempt draw a line that separates the red dots from the blue dots, it would be impossible to do so perfectly with a strait line, no matter how it is rotated (figure 1). Luckily, SVM allows for planes to have varying degrees of 'curveyness' based on the /gamma parameter. Adjusting /gamma can allow the model to be more or less stringent, too little and the model will not perform well, too much and the model will be overfit. Tuning the parameter to the perfect amount is difficult, but can be approximated via bootstrapping/sampling techniques. Another parameter to consider is the 'cost'. When drawing the planes that separate the data, SVM first finds the different regions where each response category is centered. The space between these regions can different rules when it comes to how 'empty? they are allowed to be. When no points are allowed in between each region, the model is called 'strict?  and the cost parameter is 0. As the cost parameter is increased, more and more points are allowed to reside in the space between regions. Strict models rarely perform at their peak, with many packages defaulting the cost value to 1. After tuning our model with the linear.svc function from the sklearn package, we used a cost parameter of .01. For a more in-depth look at SVM and the underlying math check out (INSERT HERE).(CITE)
-To further improve the accuracy of our SVM model, we created 100 SVM models from different randomly subsetted training sets, then decided the category of new data via a vote from our 100 different models. This is done in the hopes that diversifying our selection process will aid in classifying borderline data points, and help us identify the structure of difficult to classify numbers.
+To further improve the accuracy of our SVM model within the BBD, we created 100 SVM models from different randomly subsetted training sets, then decided the category of new data via a vote from our 100 different models. This is done in the hopes that diversifying our selection process will aid in classifying borderline data points, and help us identify the structure of difficult to classify numbers.
 \subsection{KNN}
 K nearest neighbor (KNN) is the most intuitive of the machine learning techniques. Imagine a having a group of people were everyone's height, weight and sex is known except for one person called C.   The only thing known about C is their height and weight, but not their sex. One way to guess at the sex of C, is to look at the k people with the most similar heights and weights, and make a guess based on what the most common sex amongst that group is. That is the essence of KNN, training data is fit to a model, and the response of a new data point is determined by the responses of the k nearest points to C. Nearest, in our case, means Euclidean distance, but other metrics can be used. The points that make up the k-nearest neighbors are called the neighborhood of C, and they can be processed in different ways. The most common way is a simple vote. Each point inside the neighborhood is asked what it's response category is, and the category with the most points determines the prediction of C. This way, all points have an equal say in the decision, regardless of how far away they are from C. We decided that the distance between the point in the neighborhood and C should have an impact, so our voting scheme is weighted with a gaussian curve. Thus, closer points to sigma have a vote that is worth more than points that are farther away. KNN has some advantages over SVM, one of which is that the only parameter that needs to be tuned is the number of points inside of each neighborhood, k. To find the optimal k, we used the tune function from the FNN package. \cite{FNN} For a more in-depth look into KNN and the underlying math behind it, check out Elements of Statistical Learning, section 13.1. \cite{KNNBook}
 
 \subsection{Random Forest Algorithm}
-The Random forest Algorithm is the only one of the three utilized machine learning techniques that does not take into account all of the predictors all of the time. The principal behind the Random Forest Algorithm lies in creating N decision trees and making a decision based on the winner of a vote where every tree gets an equal say. For more information on decision trees, check out (INSERT HERE)(CITE). The number of trees used in each forest is determined based on computing power and possible subsets of the predictors. Decision trees can be overfit if too many predictors are fed through them, but ignoring large swathes of predictors underutilized the information. The random forest algorithm solves this trade off by randomly subsetting M of the predictors and creating a decision tree based on those predictors, then repeating this process N times. This way, no individual tree is over fit, and all of the predictors are utilized. The number of trees that can be created in our model is bounded by 784 choose M.  It is important to note that many of the predictors in our data set were completely empty, and where thus removed prior to utilizing the model. The parameters to tune in a random forest model are the number of trees (N) and the number of predictors inside each tree (M). Using the estimators function inside the skleanr.RandomForestClassifier package, we decided on a M = 10 and an N = 100. For a more in-depth look into the Random Forest Algorithm and the underlying math behind it, check out Elements of Statistical Learning, chapter 15. \cite{RandomForestBook}
+The Random forest Algorithm is the only one of the three utilized machine learning techniques that does not take into account all of the predictors all of the time. The principal behind the Random Forest Algorithm lies in creating N decision trees and making a decision based on the winner of a vote where every tree gets an equal say. For more information on decision trees, check out Elements of Statistical Learning. \cite{DecisionTree} The number of trees used in each forest is determined based on computing power and possible subsets of the predictors. Decision trees can be overfit if too many predictors are fed through them, but ignoring large swathes of predictors underutilized the information. The random forest algorithm solves this trade off by randomly subsetting M of the predictors and creating a decision tree based on those predictors, then repeating this process N times. This way, no individual tree is over fit, and all of the predictors are utilized. The number of trees that can be created in our model is bounded by 784 choose M.  It is important to note that many of the predictors in our data set were completely empty, and where thus removed prior to utilizing the model. The parameters to tune in a random forest model are the number of trees (N) and the number of predictors inside each tree (M). Using the estimators function inside the skleanr.RandomForestClassifier package, we decided on a M = 10 and an N = 100. For a more in-depth look into the Random Forest Algorithm and the underlying math behind it, check out Elements of Statistical Learning, chapter 15. \cite{RandomForestBook}
+\subsection{Becker-Barton Device}
+The thought behind the Becker-Barton Device (BBD) is that the aggregate decisions of many algorithms each playing to their strengths should be more accurate than the algorithms on their own. The structure works by evaluating the certainty of each prediction. Within each algorithm, there are means of evaluating how certain it is about any given prediction. In Random Forest and KNN, this is decided by the ratio of votes, in SVM it is decided by its proximity to the different hyperplanes. The BBD starts with loading in the training data, as well as the 100 SVM models that were pre-trained on subsets of the training data. Then the other models are initialized, their predictions made, and their certainties calculated. After that, the model looks first to KNN, if it is confident, then it trusts it's prediction. It does the same for the Random Forest algorithm. If neither are confident, it turns to the different SVM models
+
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
+    \tikzstyle{bblock} = [rectangle, draw, fill=white!20, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\begin{tikzpicture}[node distance = 2cm, auto]
+% Nodes
+\node at (2.5,5.2) {Becker-Barton Device};
+       \node [block] (init) {initialize models};
+    \node [cloud, left of=init, node distance=3.5cm] (SVM) {load SVMs};
+    \node [cloud, below of = SVM, node distance =1cm] (Train) {load Training};
+    \node [block, below of=init] (Fit) {fit predictions, calculate confidence};
+    \node [decision, below of = Fit] (KNN) {Is KNN over 65\% conf};
+    \node [cloud, left of = KNN, node distance = 3.5cm] (KNNYes) {Use KNN};
+    \node[decision, below of = KNN, node distance = 3.5cm] (RF) {Is RF over 60\% conf};
+    \node[cloud, left of = RF, node distance = 3.5cm] (RFY) {Use RF};
+    \node[decision, right of = Fit, node distance = 4 cm] (SVMMod) {Do SVM models have a winner};
+    \node[cloud, right of = SVMMod, node distance = 5cm] (SVMY) {Use SVM vote};
+    \node[cloud, right of = KNN, node distance = 7.5cm] (SVMTie) {Use SVM with \\ best record};
+    %Edges
+    \path [line] (SVM) -- (init);
+    \path [line] (Train) -- (init);
+    \path [line] (init) -- (Fit);
+    \path [line] (Fit) -- (KNN);
+    \path [line] (KNN) -- node {Yes}(KNNYes);
+    \path [line] (KNN) -- node{No}(RF);
+    \path [line] (RF) -- node{Yes}(RFY);
+    \path [line] (RF) -- node[near end]{No}(SVMMod);
+    \path [line] (SVMMod) -- node{Yes}(SVMY);
+    \path [line] (SVMMod) -- node{No} (SVMTie);
+\end{tikzpicture}
 
 
 \section{results}
+
+
+
 The performances of the 3 techniques and the BBD varied to some degree, but all preformed above 96\% accuracy. While this may not compare to some neural network or XGboosting techniques, it is still noteworthy that their most baseline performance was so high. The results are chronicled by the table below:
 
 \begin{center}
@@ -49,18 +94,20 @@ The performances of the 3 techniques and the BBD varied to some degree, but all 
 \hline
 Model & PCA Prior & Accuracy & Run Time\\
  \hline \hline
-  KNN & No & 36892.7 & 1\\ 
-Random Forest & No & 36113.3 & 2\\ 
- SVM & No & 36154.7 & 3\\ 
+  KNN & No &  & \\ 
+Random Forest & No &  & \\ 
+ SVM & No &  & \\ 
+ BBD & N0 &  & \\
  \hline
- KNN & Yes & 36892.7 & 1\\ 
-Random Forest & Yes & 36113.3 & 2\\ 
- SVM & Yes & 36154.7 & 3\\ 
+ KNN & Yes &  & \\ 
+Random Forest & Yes &  & \\ 
+ SVM & Yes &  & \\ 
+ BBD & Yes &  & \\
  \hline
 \end{tabular}
 \end{center}
 
-
+\section{Conclusion}
 
 %\subsection{}
 
@@ -81,7 +128,10 @@ Alina Beygelzimer, Sham Kakadet, John Langford, Sunil Arya, David Mount and Shen
   version 1.1.
 \bibitem{KNNBook}
 "13.3 Nearest Neighbor Classifiers." The Elements of Statistical Learning, Springer, 2017, pp. 463?485. 
- 
+
+\bibitem{DecisionTree}
+"Decision Trees" The Elements of Statistical Learning, Springer, 2017, pp. 305-315.
+
 \bibitem{RandomForestBook}
 "13.3 Nearest Neighbor Classifiers." The Elements of Statistical Learning, Springer, 2017, pp. 463?485.
  
