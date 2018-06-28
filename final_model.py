@@ -115,4 +115,5 @@ def main():
 			final_prediction.append(max_prob_svm)
 	return final_prediction
 
-writeToCSV(main())	
+test_list = readTestData('test.csv')
+print(len(test_list))	
