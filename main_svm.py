@@ -66,6 +66,11 @@ def testSample(labels, data, test_size):
 
 	return data_train, data_test, labels_train, labels_test
 
+def writeToCSV(prediction):
+	with open('output.csv', 'w') as myfile:
+		wr = csv.writer(myfile)
+		wr.writerow(prediction)
+
 # A funtion to fit LinearSVC to just a list of 4's and 9's
 def train94(data, labels):
 	labels_94 = []
@@ -134,26 +139,13 @@ for i in range(len(prediction)):
 '''
 # Comparing the simple Linear fit with the Two Step Linear Fit that focuses on 9's and 4's
 def main():
-	for i in range(10):
-		y, X = readTrainData('train.csv')
-		data_train, data_test, labels_train, labels_test = testSample(y, X, 0.25)
-		prediction1 = linearPredict(labels_train, data_train, data_test)
-		prediction2 = twoStepPrediction(labels_train, data_train, data_test)
-		compare1 = []
-		compare2 = []
-		print('Run: ', i)
-		for j in range(len(prediction1)):
-			if prediction1[j] == labels_test[j]:
-				compare1.append(1)
-			else:
-				compare1.append(0)
-		print('Normal Prediction Accuracy:   ',np.mean(compare1))
-		for k in range(len(prediction2)):
-			if prediction2[k] == labels_test[k]:
-				compare2.append(1)
-			else:
-				compare2.append(0)
-		print('Two Step Prediction Accuracy: ', np.mean(compare2))
-		print('----------------------------------')
-main()
-# I'm not seeing a real significant increase in accuracy, in some cases we see a decrease
+	labels_train, data_train = readTrainData('train.csv')
+	test_data = readTestData('test.csv')
+	for i in range(len(test_data)):
+		test_data[i] = test_data[i]/255
+	clf = svm.SVC()
+	clf.fit(data_train, labels_train)
+	prediction = clf.predict(test_data)
+	return prediction
+
+writeToCSV(prediction)

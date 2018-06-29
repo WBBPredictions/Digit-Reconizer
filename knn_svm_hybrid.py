@@ -30,7 +30,7 @@ def splitData(file):
 	for i in range(0, count):
 		data_test.append(data[i])
 		labels_test.append(labels[i])
-	data_train = []
+	data_train = [] 
 	labels_train = []
 	for i in range(count+1, len(data)):
 		data_train.append(data[i])

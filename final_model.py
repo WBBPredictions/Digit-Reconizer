@@ -25,6 +25,11 @@ def readTestData(file):
 	working_list = np.array(in_list)[1:].astype(int)
 	return working_list
 
+def testSample(labels, data, test_size):
+	data_train, data_test, labels_train, labels_test = train_test_split(data, labels, test_size = test_size, random_state = 0)
+
+	return data_train, data_test, labels_train, labels_test
+
 def fitKNN():
 	data, labels = readTrainData('train.csv')
 	data_test = readTestData('test.csv')
@@ -46,8 +51,10 @@ def fitRF():
 	return prediction_rf, probs_rf
 
 def saveLinear(data, labels):
+	for i in range(len(data)):
+		data[i] = data[i]/255
 	for i in range(100):
-		data_train, data_test, labels_train, labels_test = testSample(labels, data, 0.3)
+		data_train, data_test, labels_train, labels_test = testSample(labels, data, 0.4)
 		clf = svm.LinearSVC()
 		clf.fit(data_train, labels_train)
 		filename1 = 'trained_linear_%d.pkl'%(i,)
@@ -90,6 +97,7 @@ def main():
 	prediction_pool = np.array(prediction_pool).T.tolist()
 	final_prediction = []
 	print('Making Predictions...')
+	weights = {'0': 10, '1': 8, '2': 3, '3': 2, '4': 6, '5': 5, '6': 9, '7': 4, '8': 7, '9': 1}
 	for i in range(len(prediction_nn)):
 		max_prob_nn = max(probs_nn[i])
 		max_prob_rf = max(probs_rf[i])
@@ -98,22 +106,21 @@ def main():
 		try:
 			max_prob_svm = statistics.mode(prediction_pool[i])
 		except statistics.StatisticsError:
+			#a = prediction_pool[i]
+			#d = {x:a.count(x) for x in a}
 			max_prob_svm = prediction_rf[i]
-			a = prediction_pool[i]
-			d = {x:a.count(x) for x in a}
 
 		possible_preds = [index_max_prob_nn, index_max_prob_rf, max_prob_svm]
 		#try:
 		#	final_prediction.append(statistics.mode(possible_preds))
 		#except statistics.StatisticsError:
 		#	final_prediction.append(index_max_prob_nn)
-		if max_prob_nn > .5:
+		if max_prob_nn > .65:
 			final_prediction.append(prediction_nn[i])
-		elif max_prob_rf > .75:
+		elif max_prob_rf > .6:
 			final_prediction.append(prediction_rf[i])
 		else:
 			final_prediction.append(max_prob_svm)
 	return final_prediction
 
-test_list = readTestData('test.csv')
-print(len(test_list))	
+writeToCSV(main())	
