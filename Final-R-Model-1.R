@@ -1,4 +1,4 @@
-library(caret)
+#library(caret)
 #library(class)
 library(FNN)
 library(beepr)

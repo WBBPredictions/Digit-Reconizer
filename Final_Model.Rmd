@@ -1,0 +1,90 @@
+---
+title: "Final Code"
+author: "Travis Barton"
+date: "6/30/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries and functions}
+library(caret)
+library(readr)
+library(fortunes)
+library(e1071)
+library(FNN)
+library(ranger)
+```
+
+```{r data load}
+Train <- read.csv("train.csv")
+Test <- read_csv("test.csv")
+
+
+temp <- rbind(Train[,-1], Test)
+blanks <- nearZeroVar(temp,freqCut=1000, uniqueCut= .05)
+
+label.raw <- Train[,1]
+train.raw <- Train[,-1]/255
+train.raw <- train.raw[,-blanks]
+train.raw <- cbind(label.raw, train.raw)
+
+test.raw <- Test[,-blanks]/255
+
+
+
+
+```
+
+```{r PCA data prep}
+index <- nearZeroVar(Train[,-1], freqCut=1000, uniqueCut= .05)
+label <- Train[,1]
+
+dat <- Train[,-1]
+dat <- dat[,-index]
+dat <- dat/255
+cov_matrix <- cov(dat)
+
+pca_data <- prcomp(cov_matrix)
+
+PCA_var <- pca_data$sdev^2
+Total_var <- sum(pca_data$sdev^2)
+
+PCA_Digit <- data.frame("Cum_Var" = cumsum(PCA_var/Total_var), "Exact_Var" = PCA_var/Total_var)
+
+# Lets do the first 20 var then, love.
+
+new_data <- as.matrix(dat) %*% pca_data$rotation[,1:20]
+
+new_data <- cbind(label, new_data)
+Train.pca <- as.data.frame(new_data)
+Test.pca <- Test[,-index]
+Test.pca <- Test.pca/255
+
+Test.pca <- as.matrix(Test.pca) %*% pca_data$rotation[,1:20]
+
+
+```
+
+
+```{r raw models}
+fit.svm <- svm(label ~ ., train.raw, type = "C-classification")
+fit.rf <- ranger(label ~ ., train.raw, classification = T, mtry = 10, num.trees = 50)
+
+pred.svm <- predict(fit.svm, test.raw)
+pred.rf <- predict(fit.rf, test.raw)
+pred.knn <- knn(train = train.raw[,-1]*255, test = test.raw*255, cl = train.raw[,1], k = 4)
+```
+
+
+```{r raw models with PCA}
+fit.svm.pca <- svm(label ~ ., Train.pca, type = "C-classification")
+fit.rf.pca <- ranger(label ~ ., Train.pca, classification = T, mtry = 10, num.trees = 50)
+
+pred.svm.pca <- predict(fit.svm.pca, Test.pca)
+pred.rf.pca <- predict(fit.rf.pca, Test.pca)
+pred.knn.pca <- knn(train = Train.pca[,-1], test = Test.pca, cl = Train.pca[,1], k = 4)
+```
+
