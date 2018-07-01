@@ -32,27 +32,54 @@ percent <- function(in_table)
   return(sum(diag(in_table))/sum(in_table))
 }
 
-dat <- read_csv("~/Desktop/Projects/Group/Mini_train_temp.csv", col_types = cols(X1 = col_skip()))
+datt <- read_csv("~/Desktop/Projects/Group/Mini_train_temp.csv", col_types = cols(X1 = col_skip()))
 
-
+dat <- Cross_val_maker(datt[,-(index+1)], .1)
+Train <- dat$Train/255
+Train[,1] <- Train[,1]*255
+Test <- dat$Test/255
+Test[,1] <- dat$Test[,1]*255
 
 ```
 
 
 ```{R Model Fits, Predictions}
-fit.svm <- mcSVM(label ~ ., Train, predict.prob = T, mc_type = "AvA")
-fit.knn <- knn(Train[,-1], Test[,-1], cl = Train[, 1], algorithm = "brute", prob = T)
-fit.rf <- ranger(label~ ., Train, num.trees = 500, mtry = 60)
 
-pred.svm <- predict(fit.svm, Test[,-1])
+fit.knn <- knn(Train[,-1], Test[,-1], cl = Train[, 1], algorithm = "cover_tree", prob = T, k = 3)
+fit.rf <- ranger(factor(label)~ ., Train, num.trees = 100, mtry = 10, classification = T)
+
 pred.knn <- fit.knn
 pred.rf <- predict(fit.rf, Test[,-1])
+pred.svm <- {}
+for(i in 1:100)
+{
+  fit.svm <- svm(label ~ ., Train, type = "C-classification", kernel = "linear")
+  pred.svm <- predict(fit.svm, Test[,-1])
+  beep()
+    #rbind(pred.svm, predict(fit.svm, Test[,-1]))
+}
 ```
 
 ```{r Decision Alg}
 Predicted_Survival <- function(pred.svm, pred.knn, pred.rf)
 {
-  
+  final.pred <- {}
+  for(i in 1:length(pred.svm))
+  {
+    if(pred.knn$pobability[i] > .5)
+    {
+      final.pred[i] <- pred.knn[i]
+    }
+    else if (pred.rf$probability[i] > .75)
+    {
+      final.pred[i] <- pred.rf[i]
+    }
+    else
+    {
+      final.pred[i] <- pred.svm[i]
+    }
+    
+  }
 }
 
 
