@@ -18,6 +18,7 @@ library(fortunes)
 library(e1071)
 library(FNN)
 library(ranger)
+library(randomForest)
 ```
 
 ```{r data load}
@@ -26,7 +27,7 @@ Test <- read_csv("test.csv")
 
 
 temp <- rbind(Train[,-1], Test)
-blanks <- nearZeroVar(temp,freqCut=1000, uniqueCut= .05)
+blanks <- nearZeroVar(temp,freqCut=1000, uniqueCut= .01)
 
 label.raw <- Train[,1]
 train.raw <- Train[,-1]/255
@@ -56,7 +57,6 @@ Total_var <- sum(pca_data$sdev^2)
 
 PCA_Digit <- data.frame("Cum_Var" = cumsum(PCA_var/Total_var), "Exact_Var" = PCA_var/Total_var)
 
-# Lets do the first 20 var then, love.
 
 new_data <- as.matrix(dat) %*% pca_data$rotation[,1:20]
 
@@ -72,39 +72,27 @@ Test.pca <- as.matrix(Test.pca) %*% pca_data$rotation[,1:20]
 
 
 ```{r raw models}
-s <- Sys.time()
 
 fit.svm <- svm(label.raw ~ ., train.raw, type = "C-classification")
 pred.svm <- predict(fit.svm, test.raw)
-print(paste("SVM: ", (Sys.time()- s)))
-s <- Sys.time()
 
 fit.rf <- ranger(label.raw ~ ., train.raw, classification = T, mtry = 10, num.trees = 50)
 pred.rf <- predict(fit.rf, test.raw)
-print(paste("RF: ", (Sys.time()- s)))
-s <- Sys.time()
 
 pred.knn <- knn(train = train.raw[,-1]*255, test = test.raw*255, cl = train.raw[,1], k = 4)
-print(paste("KNN: ", (Sys.time()- s)))
-
 ```
 
 
 ```{r raw models with PCA}
-s <- Sys.time()
+
 fit.svm.pca <- svm(label ~ ., Train.pca, type = "C-classification")
 pred.svm.pca <- predict(fit.svm.pca, Test.pca)
-print(paste("SVM_PCA: ", (Sys.time()- s)))
-s <- Sys.time()
+
 
 fit.rf.pca <- ranger(label ~ ., Train.pca, classification = T, mtry = 10, num.trees = 50)
 pred.rf.pca <- predict(fit.rf.pca, Test.pca)
-print(paste("RF_PCA: ", (Sys.time()- s)))
-s <- Sys.time()
 
 pred.knn.pca <- knn(train = Train.pca[,-1], test = Test.pca, cl = Train.pca[,1], k = 4)
-print(paste("KNN_PCA: ", (Sys.time()- s)))
-s <- Sys.time()
 ```
 
 
@@ -112,55 +100,65 @@ s <- Sys.time()
 
 ## This device is without the 100 svm models. To find that please see the python code. 
 
-Becker_Barton_Device <- function(Train, Test, L, mtry = 10, numtree = 50, gamma = 1/ncol(Train), cost = 1, svm.kernel = 'radial')
+Becker_Barton_Device <- function(Train, Test, mtry = 10, numtree = 100, gamma = 1/ncol(Train), cost = .01, svm.kernel = 'radial', K = 5)
 {
-  fit.svm <- svm(label ~ ., Train, type = "C-classification")
-  fit.rf <- ranger(label ~ ., Train, classification = T, mtry = mtry, num.trees = numtree)
+  run_time <- list("SVM" = {}, "RF" = {}, "KNN" = {}, "Final_Selection" = {})
   
+  s <- Sys.time()
+  fit.svm <- svm(label ~ ., Train, type = "C-classification", cost = cost)
   pred.svm <- predict(fit.svm, Test)
+  run_time$SVM <- Sys.time() - s
+  s <- Sys.time()
+  
+
+  fit.rf <- randomForest(factor(label) ~ ., Train, mtry = mtry, ntree = numtree)
   pred.rf <- predict(fit.rf, Test)
+  run_time$RF = Sys.time() - s
   pred.rf.prob <- predict(fit.rf, Test, type = 'prob')
-  pred.knn <- knn(train = Train[,-1], test = Train, cl = Train[,1], k = K)
-  pred.knn.prob <- knn(train = Train[,-1], test = Train, cl = Train[,1], k = K, prob = T)
+  
+  s <- Sys.time()
+  pred.knn <- knn(train = Train[,-1], test = Test, cl = Train[,1], k = K)
+  run_time$KNN <- Sys.time() - s
+  
+  pred.knn.prob <- knn(train = Train[,-1], test = Test, cl = Train[,1], k = K, prob = T)
   pred.knn.prob <- attr(pred.knn.prob, 'prob')
   
-  final_selection <- { }
+  
   for(i in 1:length(pred.knn.prob))
   {
-    if(pred.knn.prob > .79)
+    if(pred.knn.prob[i] > .65)
     {
-      final_selection[i] = pred.knn[i]
+      run_time$Final_Selection[i] = pred.knn[i]
     }
-    else if(pred.rf.prob > .6)
+    else if(pred.rf.prob[i] > .6)
     {
-      final_selection[i] = pred.rf
+      run_time$Final_Selection[i] = pred.rf
     }
     else
     {
-      final_selection[i] = pred.svm[i]
+      run_time$Final_Selection[i] = pred.svm[i]
     }
   }
   
-  return(final_selection)
+  return(run_time)
 }
+
+
+s <- Sys.time()
 pred.BBD <- Becker_Barton_Device(train.raw, test.raw, svm.kernel = "linear")
-pred.BBD.PCA <- Becker_Barton_Device(Train.pca, Test.pca)
+s <- Sys.time() - s
+(paste("BBD Without PCA took: ",s))
+
+s <- Sys.time()
+pred.BBD.PCA <- Becker_Barton_Device(Train.pca, Test.pca)$Final_Selection
+s <- Sys.time() - s
+(paste("BBD with PCA took: ",s))
 ```
 
 
 
 
 ```{r making it kaggle worthy}
-kaggle_friendly <- function(results)
-{
-  if(class(results) == 'factor')
-  {
-    results = as.vector(results)
-  }
-  return(as.matrix(results))
-  
-}
-
 ## PCA
 #SVM
 temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.svm.pca)
@@ -180,6 +178,12 @@ temp$Label <- as.integer(temp$Label)
 temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'RF_PCA.csv')
 
+#BBD
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.BBD.PCA)
+temp$Label <- as.integer(temp$Label)
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'BBD_PCA.csv')
+
 
 ## Non_PCA
 #SVM
@@ -188,7 +192,7 @@ temp$Label <- as.integer(temp$Label) - 1
 temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'SVM.csv')
 
-# KNN
+#KNN
 temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.knn)
 temp$Label <- as.integer(temp$Label) - 1
 temp$ImageId <- as.integer(temp$ImageId)
@@ -200,5 +204,9 @@ temp$Label <- as.integer(temp$Label)
 temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'RF.csv')
 
-
+#BBD
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.BBD)
+temp$Label <- as.integer(temp$Label)
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'BBD.csv')
 ```
