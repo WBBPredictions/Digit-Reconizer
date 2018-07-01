@@ -70,8 +70,8 @@ Test.pca <- as.matrix(Test.pca) %*% pca_data$rotation[,1:20]
 
 
 ```{r raw models}
-fit.svm <- svm(label ~ ., train.raw, type = "C-classification")
-fit.rf <- ranger(label ~ ., train.raw, classification = T, mtry = 10, num.trees = 50)
+fit.svm <- svm(label.raw ~ ., train.raw, type = "C-classification")
+fit.rf <- ranger(label.raw ~ ., train.raw, classification = T, mtry = 10, num.trees = 50)
 
 pred.svm <- predict(fit.svm, test.raw)
 pred.rf <- predict(fit.rf, test.raw)
@@ -86,5 +86,45 @@ fit.rf.pca <- ranger(label ~ ., Train.pca, classification = T, mtry = 10, num.tr
 pred.svm.pca <- predict(fit.svm.pca, Test.pca)
 pred.rf.pca <- predict(fit.rf.pca, Test.pca)
 pred.knn.pca <- knn(train = Train.pca[,-1], test = Test.pca, cl = Train.pca[,1], k = 4)
+```
+
+
+```{r BBD with and without PCA}
+
+## This device is without the 100 svm models. To find that please see the python code. 
+
+Becker_Barton_Device <- function(Train, Test, L, mtry = 10, numtree = 50, gamma = 1/ncol(Train), cost = 1, svm.kernel = 'radial')
+{
+  fit.svm <- svm(label ~ ., Train, type = "C-classification")
+  fit.rf <- ranger(label ~ ., Train, classification = T, mtry = mtry, num.trees = numtree)
+  
+  pred.svm <- predict(fit.svm, Test)
+  pred.rf <- predict(fit.rf, Test)
+  pred.rf.prob <- predict(fit.rf, Test, type = 'prob')
+  pred.knn <- knn(train = Train[,-1], test = Train, cl = Train[,1], k = K)
+  pred.knn.prob <- knn(train = Train[,-1], test = Train, cl = Train[,1], k = K, prob = T)
+  pred.knn.prob <- attr(pred.knn.prob, 'prob')
+  
+  final_selection <- { }
+  for(i in 1:length(pred.knn.prob))
+  {
+    if(pred.knn.prob > .79)
+    {
+      final_selection[i] = pred.knn[i]
+    }
+    else if(pred.rf.prob > .6)
+    {
+      final_selection[i] = pred.rf
+    }
+    else
+    {
+      final_selection[i] = pred.svm[i]
+    }
+  }
+  
+  return(final_selection)
+}
+pred.BBD <- Becker_Barton_Device(train.raw, test.raw, svm.kernel = "linear")
+pred.BBD.PCA <- Becker_Barton_Device(Train.pca, Test.pca)
 ```
 
