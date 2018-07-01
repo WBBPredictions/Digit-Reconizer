@@ -3,6 +3,8 @@ title: "Final Code"
 author: "Travis Barton"
 date: "6/30/2018"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -70,22 +72,39 @@ Test.pca <- as.matrix(Test.pca) %*% pca_data$rotation[,1:20]
 
 
 ```{r raw models}
-fit.svm <- svm(label.raw ~ ., train.raw, type = "C-classification")
-fit.rf <- ranger(label.raw ~ ., train.raw, classification = T, mtry = 10, num.trees = 50)
+s <- Sys.time()
 
+fit.svm <- svm(label.raw ~ ., train.raw, type = "C-classification")
 pred.svm <- predict(fit.svm, test.raw)
+print(paste("SVM: ", (Sys.time()- s)))
+s <- Sys.time()
+
+fit.rf <- ranger(label.raw ~ ., train.raw, classification = T, mtry = 10, num.trees = 50)
 pred.rf <- predict(fit.rf, test.raw)
+print(paste("RF: ", (Sys.time()- s)))
+s <- Sys.time()
+
 pred.knn <- knn(train = train.raw[,-1]*255, test = test.raw*255, cl = train.raw[,1], k = 4)
+print(paste("KNN: ", (Sys.time()- s)))
+
 ```
 
 
 ```{r raw models with PCA}
+s <- Sys.time()
 fit.svm.pca <- svm(label ~ ., Train.pca, type = "C-classification")
-fit.rf.pca <- ranger(label ~ ., Train.pca, classification = T, mtry = 10, num.trees = 50)
-
 pred.svm.pca <- predict(fit.svm.pca, Test.pca)
+print(paste("SVM_PCA: ", (Sys.time()- s)))
+s <- Sys.time()
+
+fit.rf.pca <- ranger(label ~ ., Train.pca, classification = T, mtry = 10, num.trees = 50)
 pred.rf.pca <- predict(fit.rf.pca, Test.pca)
+print(paste("RF_PCA: ", (Sys.time()- s)))
+s <- Sys.time()
+
 pred.knn.pca <- knn(train = Train.pca[,-1], test = Test.pca, cl = Train.pca[,1], k = 4)
+print(paste("KNN_PCA: ", (Sys.time()- s)))
+s <- Sys.time()
 ```
 
 
@@ -128,3 +147,58 @@ pred.BBD <- Becker_Barton_Device(train.raw, test.raw, svm.kernel = "linear")
 pred.BBD.PCA <- Becker_Barton_Device(Train.pca, Test.pca)
 ```
 
+
+
+
+```{r making it kaggle worthy}
+kaggle_friendly <- function(results)
+{
+  if(class(results) == 'factor')
+  {
+    results = as.vector(results)
+  }
+  return(as.matrix(results))
+  
+}
+
+## PCA
+#SVM
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.svm.pca)
+temp$Label <- as.integer(temp$Label) - 1
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'SVM_PCA.csv')
+
+#KNN
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.knn.pca)
+temp$Label <- as.integer(temp$Label) - 1
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'KNN_PCA.csv')
+
+#RF
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.rf.pca$predictions)
+temp$Label <- as.integer(temp$Label)
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'RF_PCA.csv')
+
+
+## Non_PCA
+#SVM
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.svm)
+temp$Label <- as.integer(temp$Label) - 1
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'SVM.csv')
+
+# KNN
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.knn)
+temp$Label <- as.integer(temp$Label) - 1
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'KNN.csv')
+
+#RF
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.rf$predictions)
+temp$Label <- as.integer(temp$Label)
+temp$ImageId <- as.integer(temp$ImageId)
+write_csv(temp, 'RF.csv')
+
+
+```
