@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  28 JUN 2018 20:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  2 JUL 2018 19:49
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -611,39 +611,40 @@ Overfull \hbox (3.04167pt too wide) in paragraph at lines 51--52
  []
 
 [4] [5 <./Figure_2.png>] [6]
-Overfull \hbox (47.64645pt too wide) in paragraph at lines 96--97
+Overfull \hbox (47.64645pt too wide) in paragraph at lines 97--98
 [][] 
  []
 
 [7] [8]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 133.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 135.
 
  (/usr/local/texlive/2016/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 133.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 135.
  [9]
 [10] (./Final Paper.aux) ) 
 Here is how much of TeX's memory you used:
- 14701 strings out of 493014
- 316053 string characters out of 6133351
- 378901 words of memory out of 5000000
- 17959 multiletter control sequences out of 15000+600000
- 11390 words of font info for 43 fonts, out of 8000000 for 9000
+ 14703 strings out of 493014
+ 316077 string characters out of 6133351
+ 379052 words of memory out of 5000000
+ 17960 multiletter control sequences out of 15000+600000
+ 11698 words of font info for 44 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,7n,67p,2541b,601s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,7n,67p,2700b,601s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmr10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmr12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmr17.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmsy10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmti10.pfb>
-Output written on "Final Paper.pdf" (10 pages, 187273 bytes).
+c/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmr12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmr17.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmsy10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmti10.pfb>
+Output written on "Final Paper.pdf" (10 pages, 200585 bytes).
 PDF statistics:
- 69 PDF objects out of 1000 (max. 8388607)
- 46 compressed objects within 1 object stream
+ 73 PDF objects out of 1000 (max. 8388607)
+ 49 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  23 words of extra memory for PDF output out of 10000 (max. 10000000)
 
