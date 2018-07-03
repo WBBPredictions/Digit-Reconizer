@@ -179,7 +179,7 @@ temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'RF_PCA.csv')
 
 #BBD
-temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.BBD.PCA)
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.BBD.PCA$Final_Selection)
 temp$Label <- as.integer(temp$Label)
 temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'BBD_PCA.csv')
@@ -205,7 +205,7 @@ temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'RF.csv')
 
 #BBD
-temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.BBD)
+temp <- data.frame("ImageId" = seq(1, 28000, 1), "Label" = pred.BBD$Final_Selection)
 temp$Label <- as.integer(temp$Label)
 temp$ImageId <- as.integer(temp$ImageId)
 write_csv(temp, 'BBD.csv')
